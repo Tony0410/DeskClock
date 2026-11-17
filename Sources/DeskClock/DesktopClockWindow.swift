@@ -1,8 +1,11 @@
 import AppKit
 
 final class DesktopClockWindow: NSWindow {
-    private let textField = NSTextField(labelWithString: "")
-    private var config: DeskConfig
+    let textField = NSTextField(labelWithString: "")
+    var config: DeskConfig
+
+    override var canBecomeKey: Bool { true }
+    override var canBecomeMain: Bool { true }
     private var timer: Timer?
     private var shadow: NSShadow?
     private var lastWallpaperMtime: Date?
@@ -13,7 +16,11 @@ final class DesktopClockWindow: NSWindow {
         let screen = NSScreen.main ?? NSScreen.screens.first!
         let frame = DesktopClockWindow.frame(for: config, on: screen)
         super.init(contentRect: frame, styleMask: [.borderless], backing: .buffered, defer: false)
-        self.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopWindow)))
+        // Above the desktop/Finder window (which draws the wallpaper + icons at
+        // ~-2147483603) but just below normal app windows (0), so the clock is
+        // visible on the desktop yet never covers app windows. Click-through is
+        // preserved via ignoresMouseEvents, so desktop icons still receive clicks.
+        self.level = NSWindow.Level(rawValue: -1)
         self.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
         self.isOpaque = false
         self.backgroundColor = .clear
@@ -106,13 +113,20 @@ final class DesktopClockWindow: NSWindow {
     }
 
     private func updateText() {
-        let font = textField.font ?? NSFont.systemFont(ofSize: 12)
-        let color = textField.textColor ?? NSColor.white
+        let screen = self.screen ?? NSScreen.main
+        let fontSize = (screen?.frame.height ?? 1000) * CGFloat(config.fontScale)
+        let font = resolveFont(config: config, size: fontSize)
+        let color = resolveColor(config: config)
         let attr = NSMutableAttributedString(string: formattedTime())
         let range = NSRange(location: 0, length: attr.length)
         attr.addAttribute(.font, value: font, range: range)
         attr.addAttribute(.foregroundColor, value: color, range: range)
         attr.addAttribute(.kern, value: NSNumber(value: config.letterSpacing), range: range)
+        let sh = NSShadow()
+        sh.shadowColor = (color == .white || color == NSColor.white) ? NSColor.black.withAlphaComponent(0.35) : NSColor.white.withAlphaComponent(0.35)
+        sh.shadowBlurRadius = 6
+        sh.shadowOffset = NSSize(width: 0, height: -1)
+        attr.addAttribute(.shadow, value: sh, range: range)
         textField.attributedStringValue = attr
     }
 

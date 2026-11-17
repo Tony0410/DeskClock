@@ -45,7 +45,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 // NSWindow helper
 extension DesktopClockWindow {
     func showWindow() {
-        self.orderFrontRegardless()
+        NSApp.activate(ignoringOtherApps: true)
+        self.makeKeyAndOrderFront(nil)
+        let debug = "frame=\(self.frame) level=\(self.level.rawValue) textFieldFrame=\(self.textField.frame) text='\(self.textField.stringValue)' colorMode=\(self.config.colorMode) color=\(self.config.color)"
+        try? debug.write(toFile: "/tmp/deskclock-debug.txt", atomically: true, encoding: .utf8)
     }
 }
 
