@@ -21,7 +21,10 @@ final class DesktopClockWindow: NSWindow {
         // visible on the desktop yet never covers app windows. Click-through is
         // preserved via ignoresMouseEvents, so desktop icons still receive clicks.
         self.level = NSWindow.Level(rawValue: -1)
-        self.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
+        // canJoinAllSpaces makes the clock appear on every Space; fullScreenAuxiliary
+        // keeps it visible over fullscreen apps. (No .stationary — that pinned it
+        // to a single Space, which is the opposite of what we want.)
+        self.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle]
         self.isOpaque = false
         self.backgroundColor = .clear
         self.hasShadow = false

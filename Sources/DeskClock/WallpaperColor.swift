@@ -27,11 +27,18 @@ enum WallpaperColor {
     static func contrastingText(for avg: (r: Double, g: Double, b: Double)?) -> NSColor {
         guard let a = avg else { return NSColor.white }
         let lum = 0.299 * a.r + 0.587 * a.g + 0.114 * a.b
-        // pick a color with strong contrast; slight tint toward complement for character
+        // Tint the text toward the wallpaper's hue so it complements the desktop,
+        // while keeping strong contrast (dark on light wallpapers, light on dark).
         if lum > 0.55 {
-            return NSColor(calibratedRed: 0.06, green: 0.06, blue: 0.08, alpha: 1.0)
+            // dark text: blend wallpaper hue into near-black at ~25%
+            return NSColor(calibratedRed: a.r * 0.22,
+                           green: a.g * 0.22,
+                           blue: a.b * 0.22, alpha: 1.0)
         } else {
-            return NSColor(calibratedRed: 0.96, green: 0.96, blue: 0.98, alpha: 1.0)
+            // light text: blend wallpaper hue into near-white at ~25%
+            return NSColor(calibratedRed: 0.82 + a.r * 0.18,
+                           green: 0.82 + a.g * 0.18,
+                           blue: 0.82 + a.b * 0.18, alpha: 1.0)
         }
     }
 

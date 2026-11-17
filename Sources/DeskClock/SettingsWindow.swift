@@ -17,6 +17,7 @@ final class SettingsWindow: NSWindow {
     private let fontPopup = NSPopUpButton()
     private let loginCheckbox = NSButton(checkboxWithTitle: "Start at login", target: nil, action: nil)
     private let resetButton = NSButton(title: "Reset", target: nil, action: nil)
+    private let centerButton = NSButton(title: "Center horizontally", target: nil, action: nil)
 
     init(config: DeskConfig, onChange: @escaping (DeskConfig) -> Void) {
         self.config = config
@@ -68,6 +69,7 @@ final class SettingsWindow: NSWindow {
 
         loginCheckbox.target = self; loginCheckbox.action = #selector(changed)
         resetButton.target = self; resetButton.action = #selector(reset)
+        centerButton.target = self; centerButton.action = #selector(centerHoriz)
 
         stack.addArrangedSubview(row("Size (% of screen height)", sizeSlider))
         stack.addArrangedSubview(row("X position (%)", xSlider))
@@ -78,7 +80,10 @@ final class SettingsWindow: NSWindow {
         stack.addArrangedSubview(row("Custom colour", colorField))
         stack.addArrangedSubview(row("Font", fontPopup))
         stack.addArrangedSubview(loginCheckbox)
-        stack.addArrangedSubview(resetButton)
+        let btnRow = NSStackView(views: [centerButton, resetButton])
+        btnRow.orientation = .horizontal
+        btnRow.spacing = 8
+        stack.addArrangedSubview(btnRow)
 
         let scroll = NSScrollView()
         scroll.documentView = stack
@@ -157,6 +162,11 @@ final class SettingsWindow: NSWindow {
         syncFromConfig()
         config.save()
         onChange(config)
+    }
+
+    @objc private func centerHoriz() {
+        xSlider.doubleValue = 50
+        changed()
     }
 
     func show() {
