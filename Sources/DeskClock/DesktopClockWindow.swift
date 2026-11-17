@@ -21,10 +21,10 @@ final class DesktopClockWindow: NSWindow {
         // visible on the desktop yet never covers app windows. Click-through is
         // preserved via ignoresMouseEvents, so desktop icons still receive clicks.
         self.level = NSWindow.Level(rawValue: -1)
-        // canJoinAllSpaces makes the clock appear on every Space; fullScreenAuxiliary
-        // keeps it visible over fullscreen apps. (No .stationary — that pinned it
-        // to a single Space, which is the opposite of what we want.)
-        self.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle]
+        // canJoinAllSpaces: appear on every Space.
+        // stationary: do not animate away during Show Desktop / space transitions.
+        // fullScreenAuxiliary: stay visible over fullscreen apps.
+        self.collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary, .ignoresCycle]
         self.isOpaque = false
         self.backgroundColor = .clear
         self.hasShadow = false
@@ -66,15 +66,18 @@ final class DesktopClockWindow: NSWindow {
         let fontSize = screen.frame.height * CGFloat(config.fontScale)
         let font = resolveFont(config: config, size: fontSize)
         let color = resolveColor(config: config)
+        let para = NSMutableParagraphStyle()
+        para.alignment = .center
         let attr = NSMutableAttributedString(string: formattedTime())
         let range = NSRange(location: 0, length: attr.length)
         attr.addAttribute(.font, value: font, range: range)
         attr.addAttribute(.foregroundColor, value: color, range: range)
         attr.addAttribute(.kern, value: NSNumber(value: config.letterSpacing), range: range)
+        attr.addAttribute(.paragraphStyle, value: para, range: range)
         let sh = NSShadow()
-        sh.shadowColor = color == .white ? NSColor.black.withAlphaComponent(0.35) : NSColor.white.withAlphaComponent(0.35)
-        sh.shadowBlurRadius = 6
-        sh.shadowOffset = NSSize(width: 0, height: -1)
+        sh.shadowColor = NSColor.black.withAlphaComponent(0.4)
+        sh.shadowBlurRadius = 8
+        sh.shadowOffset = NSSize(width: 0, height: -2)
         attr.addAttribute(.shadow, value: sh, range: range)
         textField.attributedStringValue = attr
 
@@ -120,15 +123,18 @@ final class DesktopClockWindow: NSWindow {
         let fontSize = (screen?.frame.height ?? 1000) * CGFloat(config.fontScale)
         let font = resolveFont(config: config, size: fontSize)
         let color = resolveColor(config: config)
+        let para = NSMutableParagraphStyle()
+        para.alignment = .center
         let attr = NSMutableAttributedString(string: formattedTime())
         let range = NSRange(location: 0, length: attr.length)
         attr.addAttribute(.font, value: font, range: range)
         attr.addAttribute(.foregroundColor, value: color, range: range)
         attr.addAttribute(.kern, value: NSNumber(value: config.letterSpacing), range: range)
+        attr.addAttribute(.paragraphStyle, value: para, range: range)
         let sh = NSShadow()
-        sh.shadowColor = (color == .white || color == NSColor.white) ? NSColor.black.withAlphaComponent(0.35) : NSColor.white.withAlphaComponent(0.35)
-        sh.shadowBlurRadius = 6
-        sh.shadowOffset = NSSize(width: 0, height: -1)
+        sh.shadowColor = NSColor.black.withAlphaComponent(0.4)
+        sh.shadowBlurRadius = 8
+        sh.shadowOffset = NSSize(width: 0, height: -2)
         attr.addAttribute(.shadow, value: sh, range: range)
         textField.attributedStringValue = attr
     }
