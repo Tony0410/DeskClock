@@ -10,9 +10,13 @@ final class StatusItemController {
         self.onQuit = onQuit
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "clock", accessibilityDescription: "DeskClock")
+            // Use a unicode clock glyph as the title so the item is always visible
+            // regardless of SF Symbol availability or menu-bar overflow.
+            button.title = "⏱"
+            button.font = NSFont.systemFont(ofSize: 14)
             button.action = #selector(toggleSettings)
             button.target = self
+            button.toolTip = "DeskClock — click for settings"
         }
         let menu = NSMenu()
         let show = NSMenuItem(title: "Settings…", action: #selector(toggleSettings), keyEquivalent: ",")
